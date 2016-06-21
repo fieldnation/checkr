@@ -70,6 +70,7 @@ func (c Candidate) Create() error {
 			return err
 		}
 
+		// return the HTTP response body as an error
 		return errors.New(string(b))
 	}
 
