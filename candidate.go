@@ -1,6 +1,13 @@
 package checkr
 
-import "time"
+import (
+	"bytes"
+	"encoding/json"
+	"errors"
+	"io/ioutil"
+	"net/http"
+	"time"
+)
 
 // Candidate represents a candidate to be screened.
 type Candidate struct {
@@ -25,4 +32,46 @@ type Candidate struct {
 	CustomID                    string    `json:"custom_id"`
 	ReportIDs                   []string  `json:"report_ids"`
 	GeoIDs                      []string  `json:"geo_ids"`
+}
+
+// Create sends a request to create a new Candidate.
+func (c Candidate) Create() error {
+
+	// marshal the candidate to buffered bytes representing JSON
+	b, err := json.Marshal(c)
+	if err != nil {
+		return err
+	}
+	buf := bytes.NewBuffer(b)
+
+	// create a new request
+	url := v1 + "candidates"
+	req, err := http.NewRequest(http.MethodPost, url, buf)
+	if err != nil {
+		return err
+	}
+
+	// set API key for authentication and authorization
+	req.SetBasicAuth(apiKey, "")
+
+	// send the HTTP request with the default Go client
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+
+	// check the HTTP response status code is 201
+	if resp.StatusCode != http.StatusCreated {
+
+		// read the HTTP response body
+		defer resp.Body.Close()
+		b, err = ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
+
+		return errors.New(string(b))
+	}
+
+	return nil
 }
