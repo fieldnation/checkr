@@ -34,7 +34,7 @@ type Candidate struct {
 	GeoIDs                      []string  `json:"geo_ids"`
 }
 
-// Create sends a request to create a new Candidate.
+// Create sends an HTTP request to create a new Candidate.
 func (c Candidate) Create() error {
 
 	// marshal the candidate to buffered bytes representing JSON
