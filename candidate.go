@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -39,6 +40,19 @@ type Candidate struct {
 
 // Create sends a request to create a new Candidate.
 func (c Candidate) Create() error {
+
+	// required sanity check
+	if c.FirstName == "" || c.LastName == "" || c.Email == "" || c.Phone == "" || c.Zipcode == "" || c.DOB == "" {
+		return fmt.Errorf(
+			"missing one of these required fields firstname: %q, lastname: %q, email: %q, phone: %q, zipcode: %q, dob: %q",
+			c.FirstName, c.LastName, c.Email, c.Phone, c.Zipcode, c.DOB,
+		)
+	}
+
+	// middle name sanity check
+	if c.MiddleName == "" && !c.NoMiddleName {
+		return errors.New("middle_name is required unless no_middle_name is true")
+	}
 
 	// marshal the candidate to buffered bytes representing JSON
 	b, err := json.Marshal(c)
