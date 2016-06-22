@@ -42,11 +42,11 @@ func (c Candidate) Create() error {
 	if err != nil {
 		return err
 	}
-	buf := bytes.NewBuffer(b)
+	body := bytes.NewBuffer(b)
 
 	// create a new request
-	url := v1 + "candidates"
-	req, err := http.NewRequest(http.MethodPost, url, buf)
+	url := URL.String() + candidates
+	req, err := http.NewRequest(http.MethodPost, url, body)
 	if err != nil {
 		return err
 	}
