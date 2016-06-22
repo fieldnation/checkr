@@ -6,8 +6,8 @@ import (
 	"strconv"
 )
 
-// Paginater describes pagination
-type Paginater interface {
+// Pagination describes pagination
+type Pagination interface {
 	First() bool
 	Last() bool
 	Next() error
@@ -20,8 +20,8 @@ type Paginater interface {
 	Clear()
 }
 
-// Pagination represents a list of paginated results.
-type Pagination struct {
+// Paginator represents a list of paginated results.
+type Paginator struct {
 	Object       string `json:"object,omitempty"`
 	NextHref     string `json:"next_href,omitempty"`
 	PreviousHref string `json:"previous_href,omitempty"`
@@ -30,15 +30,15 @@ type Pagination struct {
 	perPage      int
 }
 
-func (p Pagination) First() bool {
+func (p Paginator) First() bool {
 	return p.PreviousHref != ""
 }
 
-func (p Pagination) Last() bool {
+func (p Paginator) Last() bool {
 	return p.NextHref != ""
 }
 
-func (p *Pagination) Next() error {
+func (p *Paginator) Next() error {
 
 	if p.Last() {
 		return errors.New("cannot advance to next page")
@@ -76,7 +76,7 @@ func (p *Pagination) Next() error {
 	return nil
 }
 
-func (p *Pagination) Previous() error {
+func (p *Paginator) Previous() error {
 
 	if p.First() {
 		return errors.New("cannot advance to previous page")
@@ -114,29 +114,27 @@ func (p *Pagination) Previous() error {
 	return nil
 }
 
-func (p *Pagination) SetPage(page int) {
+func (p *Paginator) SetPage(page int) {
 	p.page = page
 }
 
-func (p *Pagination) SetPerPage(perPage int) {
+func (p *Paginator) SetPerPage(perPage int) {
 	p.perPage = perPage
 }
 
-func (p Pagination) Page() int {
+func (p Paginator) Page() int {
 	return p.page
 }
 
-func (p Pagination) PerPage() int {
+func (p Paginator) PerPage() int {
 	return p.perPage
 }
 
-func (p Pagination) Total() int {
+func (p Paginator) Total() int {
 	return p.Count
 }
 
-func (p *Pagination) Clear() {
+func (p *Paginator) Clear() {
 	p.page = -1
 	p.perPage = -1
 }
-
-// http://api.checkr.com/v1/candidates?page=1&per_page=25

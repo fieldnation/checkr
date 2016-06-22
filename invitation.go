@@ -79,7 +79,7 @@ func (i Invitation) Create() error {
 
 // Invitations represents a listing of invitations.
 type Invitations struct {
-	Pagination
+	Paginator
 	Data []Invitation `json:"data"`
 }
 

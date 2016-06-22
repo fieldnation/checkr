@@ -39,7 +39,7 @@ type Candidate struct {
 
 // Candidates represents a listing of candidates.
 type Candidates struct {
-	Pagination
+	Paginator
 	Data []Candidate `json:"data"`
 }
 
