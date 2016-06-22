@@ -23,9 +23,25 @@ func TestCandidateCreate(t *testing.T) {
 
 func TestCandidatesIndex(t *testing.T) {
 	SetAPIKey(testKey)
-	c := Candidates{}
+
+	c := &Candidates{}
 	if err := c.Index(); err != nil {
 		t.Error(err)
+	}
+
+	prevID := c.Data[0].ID
+
+	if err := c.Next(); err != nil {
+		t.Error(err)
+		return
+	}
+
+	if err := c.Index(); err != nil {
+		t.Error(err)
+	}
+
+	if prevID == c.Data[0].ID {
+		t.Errorf("expected %q and %q to be different", prevID, c.Data[0].ID)
 	}
 }
 

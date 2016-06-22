@@ -31,11 +31,11 @@ type Paginator struct {
 }
 
 func (p Paginator) First() bool {
-	return p.PreviousHref != ""
+	return p.PreviousHref == ""
 }
 
 func (p Paginator) Last() bool {
-	return p.NextHref != ""
+	return p.NextHref == ""
 }
 
 func (p *Paginator) Next() error {
