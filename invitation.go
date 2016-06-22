@@ -77,6 +77,54 @@ func (i Invitation) Create() error {
 	return nil
 }
 
+// Show shows one invitation.
+func (i *Invitation) Show() error {
+
+	if i.ID == "" {
+		return errors.New("an id is needed to show an invitation")
+	}
+
+	// create a new request
+	u, _ := url.Parse(URL.String())
+	u.Path = path.Join(URL.Path, invitations, i.ID)
+
+	// create a new request
+	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
+	if err != nil {
+		return err
+	}
+
+	// set API key for authentication and authorization
+	req.SetBasicAuth(apiKey, "")
+
+	// send the HTTP request with the default Go client
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+
+	// read the HTTP response body
+	defer resp.Body.Close()
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	// unmarshal the candidate
+	if err = json.Unmarshal(b, &i); err != nil {
+		return err
+	}
+
+	// check the HTTP response status code is 200
+	if resp.StatusCode != http.StatusOK {
+
+		// return the HTTP response body as an error
+		return errors.New(string(b))
+	}
+
+	return nil
+}
+
 // Invitations represents a listing of invitations.
 type Invitations struct {
 	Paginator

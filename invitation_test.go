@@ -13,6 +13,18 @@ func TestCreateInvitation(t *testing.T) {
 	}
 }
 
+func TestInvitationShow(t *testing.T) {
+	SetAPIKey(testKey)
+	list := Invitations{}
+	if err := list.Index(); err != nil {
+		t.Error(err)
+	}
+	i := &Invitation{ID: list.Data[0].ID}
+	if err := i.Show(); err != nil {
+		t.Error(err)
+	}
+}
+
 func TestInvitationsIndex(t *testing.T) {
 
 	SetAPIKey(testKey)

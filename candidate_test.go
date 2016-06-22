@@ -4,7 +4,7 @@ import "testing"
 
 func TestCandidateCreate(t *testing.T) {
 	SetAPIKey(testKey)
-	c := Candidate{
+	c := &Candidate{
 		FirstName:           "John",
 		MiddleName:          "Alfred",
 		LastName:            "Smith",
@@ -47,13 +47,8 @@ func TestCandidatesIndex(t *testing.T) {
 
 func TestCandidateShow(t *testing.T) {
 	SetAPIKey(testKey)
-	c := Candidates{}
-	if err := c.Index(); err != nil {
+	c := &Candidate{ID: "e44aa283528e6fde7d542194"}
+	if err := c.Show(); err != nil {
 		t.Error(err)
-	}
-	if len(c.Data) > 0 {
-		if err := c.Data[0].Show(); err != nil {
-			t.Error(err)
-		}
 	}
 }

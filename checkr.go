@@ -14,6 +14,7 @@ const (
 	// endpoints used by different checkr API versions
 	candidates  = "/candidates"
 	invitations = "/invitations"
+	reports     = "/reports"
 )
 
 var (
