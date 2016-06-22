@@ -30,14 +30,17 @@ type Paginator struct {
 	perPage      int
 }
 
+// First checks if the current iterator is on the first page.
 func (p Paginator) First() bool {
 	return p.PreviousHref == ""
 }
 
+// Last checks if the current iterator is on the last page.
 func (p Paginator) Last() bool {
 	return p.NextHref == ""
 }
 
+// Next primes the iterator to use the next page.
 func (p *Paginator) Next() error {
 
 	if p.Last() {
@@ -76,6 +79,7 @@ func (p *Paginator) Next() error {
 	return nil
 }
 
+// Previous primes the iterator to use the previous page.
 func (p *Paginator) Previous() error {
 
 	if p.First() {
@@ -114,26 +118,33 @@ func (p *Paginator) Previous() error {
 	return nil
 }
 
+// SetPage sets the page iterator.
 func (p *Paginator) SetPage(page int) {
 	p.page = page
 }
 
+// SetPerPage sets the number of results to show per page.
 func (p *Paginator) SetPerPage(perPage int) {
 	p.perPage = perPage
 }
 
+// Page returns the current iterator page value.
 func (p Paginator) Page() int {
 	return p.page
 }
 
+// PerPage returns the current per page value.
 func (p Paginator) PerPage() int {
 	return p.perPage
 }
 
+// Total returns the total number of results.
 func (p Paginator) Total() int {
 	return p.Count
 }
 
+// Clear clears the page and per page values.
+// This is helpful for setting default values.
 func (p *Paginator) Clear() {
 	p.page = -1
 	p.perPage = -1
