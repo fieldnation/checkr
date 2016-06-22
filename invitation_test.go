@@ -13,9 +13,10 @@ func TestCreateInvitation(t *testing.T) {
 	}
 }
 
-func TestInvitations(t *testing.T) {
+func TestInvitationsIndex(t *testing.T) {
 	SetAPIKey(testKey)
-	if _, err := Invitations(); err != nil {
+	i := Invitations{}
+	if err := i.Index(); err != nil {
 		t.Error(err)
 	}
 }

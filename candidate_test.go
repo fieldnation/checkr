@@ -21,9 +21,10 @@ func TestCreateCandidate(t *testing.T) {
 	}
 }
 
-func TestCandidates(t *testing.T) {
+func TestCandidatesIndex(t *testing.T) {
 	SetAPIKey(testKey)
-	if _, err := Candidates(); err != nil {
+	c := Candidates{}
+	if err := c.Index(); err != nil {
 		t.Error(err)
 	}
 }

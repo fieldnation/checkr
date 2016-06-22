@@ -6,6 +6,9 @@ import (
 	"errors"
 	"io/ioutil"
 	"net/http"
+	"net/url"
+	"path"
+	"strconv"
 	"time"
 )
 
@@ -34,8 +37,8 @@ type Candidate struct {
 	GeoIDs                      []string   `json:"geo_ids,omitempty"`
 }
 
-// CandidateList represents a listing of candidates.
-type CandidateList struct {
+// Candidates represents a listing of candidates.
+type Candidates struct {
 	Pagination
 	Data []Candidate `json:"data"`
 }
@@ -83,17 +86,32 @@ func (c Candidate) Create() error {
 	return nil
 }
 
-// Candidates sends a request to create a new Candidate.
-//
-// https://api.checkr.com/v1/candidates?page=2&per_page=25
-//
-func Candidates() (*CandidateList, error) {
+// Index shows the index endpoint list of Candidates.
+func (c *Candidates) Index() error {
 
 	// create a new request
-	url := URL.String() + candidates
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+	u, _ := url.Parse(URL.String())
+	u.Path = path.Join(URL.Path, candidates)
+	q := u.Query()
+
+	// if page is set, encode it as a query parameter
+	if c.Page() > 0 {
+		q.Set("page", strconv.Itoa(c.Page()))
+	}
+
+	// if per page is set, encode it as a query parameter
+	if c.PerPage() > 1 {
+		q.Set("per_page", strconv.Itoa(c.PerPage()))
+	}
+
+	// clear page and per page values
+	u.RawQuery = q.Encode()
+	c.Clear()
+
+	// create a new request
+	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// set API key for authentication and authorization
@@ -102,28 +120,27 @@ func Candidates() (*CandidateList, error) {
 	// send the HTTP request with the default Go client
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// read the HTTP response body
 	defer resp.Body.Close()
 	b, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// unmarshal the candidate list
-	var list CandidateList
-	if err = json.Unmarshal(b, &list); err != nil {
-		return nil, err
+	if err = json.Unmarshal(b, &c); err != nil {
+		return err
 	}
 
 	// check the HTTP response status code is 200
 	if resp.StatusCode != http.StatusOK {
 
 		// return the HTTP response body as an error
-		return nil, errors.New(string(b))
+		return errors.New(string(b))
 	}
 
-	return &list, nil
+	return nil
 }

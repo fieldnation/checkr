@@ -6,6 +6,9 @@ import (
 	"errors"
 	"io/ioutil"
 	"net/http"
+	"net/url"
+	"path"
+	"strconv"
 	"time"
 )
 
@@ -23,12 +26,6 @@ type Invitation struct {
 	Object        string     `json:"object,omitempty"`
 	CreatedAt     *time.Time `json:"created_at,omitempty"`
 	CandidateID   string     `json:"candidate_id,omitempty"`
-}
-
-// InvitationList represents a listing of invitations.
-type InvitationList struct {
-	Pagination
-	Data []Invitation `json:"data"`
 }
 
 // Create sends an HTTP request to create a new Invitation.
@@ -80,17 +77,38 @@ func (i Invitation) Create() error {
 	return nil
 }
 
-// Invitations sends a request to create a new Invitation.
-//
-// https://api.checkr.com/v1/candidates?page=2&per_page=25
-//
-func Invitations() (*InvitationList, error) {
+// Invitations represents a listing of invitations.
+type Invitations struct {
+	Pagination
+	Data []Invitation `json:"data"`
+}
+
+// Index shows the index list of Invitations.
+func (i *Invitations) Index() error {
 
 	// create a new request
-	url := URL.String() + invitations
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+	u, _ := url.Parse(URL.String())
+	u.Path = path.Join(URL.Path, invitations)
+	q := u.Query()
+
+	// if page is set, encode it as a query parameter
+	if i.Page() > 0 {
+		q.Set("page", strconv.Itoa(i.Page()))
+	}
+
+	// if per page is set, encode it as a query parameter
+	if i.PerPage() > 1 {
+		q.Set("per_page", strconv.Itoa(i.PerPage()))
+	}
+
+	// clear page and per page values
+	u.RawQuery = q.Encode()
+	i.Clear()
+
+	// create a new request
+	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// set API key for authentication and authorization
@@ -99,28 +117,27 @@ func Invitations() (*InvitationList, error) {
 	// send the HTTP request with the default Go client
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// read the HTTP response body
 	defer resp.Body.Close()
 	b, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// unmarshal the candidate list
-	var list InvitationList
-	if err = json.Unmarshal(b, &list); err != nil {
-		return nil, err
+	if err = json.Unmarshal(b, &i); err != nil {
+		return err
 	}
 
 	// check the HTTP response status code is 200
 	if resp.StatusCode != http.StatusOK {
 
 		// return the HTTP response body as an error
-		return nil, errors.New(string(b))
+		return errors.New(string(b))
 	}
 
-	return &list, nil
+	return nil
 }
