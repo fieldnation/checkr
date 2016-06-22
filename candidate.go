@@ -37,12 +37,6 @@ type Candidate struct {
 	GeoIDs                      []string   `json:"geo_ids,omitempty"`
 }
 
-// Candidates represents a listing of candidates.
-type Candidates struct {
-	Paginator
-	Data []Candidate `json:"data"`
-}
-
 // Create sends a request to create a new Candidate.
 func (c Candidate) Create() error {
 
@@ -84,6 +78,60 @@ func (c Candidate) Create() error {
 	}
 
 	return nil
+}
+
+// Show shows one candidate.
+func (c *Candidate) Show() error {
+
+	if c.ID == "" {
+		return errors.New("an id is needed to show a candidate")
+	}
+
+	// create a new request
+	u, _ := url.Parse(URL.String())
+	u.Path = path.Join(URL.Path, candidates, c.ID)
+
+	// create a new request
+	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
+	if err != nil {
+		return err
+	}
+
+	// set API key for authentication and authorization
+	req.SetBasicAuth(apiKey, "")
+
+	// send the HTTP request with the default Go client
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+
+	// read the HTTP response body
+	defer resp.Body.Close()
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	// unmarshal the candidate
+	if err = json.Unmarshal(b, &c); err != nil {
+		return err
+	}
+
+	// check the HTTP response status code is 200
+	if resp.StatusCode != http.StatusOK {
+
+		// return the HTTP response body as an error
+		return errors.New(string(b))
+	}
+
+	return nil
+}
+
+// Candidates represents a listing of candidates.
+type Candidates struct {
+	Paginator
+	Data []Candidate `json:"data"`
 }
 
 // Index shows the index endpoint list of Candidates.

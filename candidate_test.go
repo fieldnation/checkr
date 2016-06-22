@@ -2,7 +2,7 @@ package checkr
 
 import "testing"
 
-func TestCreateCandidate(t *testing.T) {
+func TestCandidateCreate(t *testing.T) {
 	SetAPIKey(testKey)
 	c := Candidate{
 		FirstName:           "John",
@@ -26,5 +26,18 @@ func TestCandidatesIndex(t *testing.T) {
 	c := Candidates{}
 	if err := c.Index(); err != nil {
 		t.Error(err)
+	}
+}
+
+func TestCandidateShow(t *testing.T) {
+	SetAPIKey(testKey)
+	c := Candidates{}
+	if err := c.Index(); err != nil {
+		t.Error(err)
+	}
+	if len(c.Data) > 0 {
+		if err := c.Data[0].Show(); err != nil {
+			t.Error(err)
+		}
 	}
 }
