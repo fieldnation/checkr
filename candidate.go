@@ -34,6 +34,12 @@ type Candidate struct {
 	GeoIDs                      []string  `json:"geo_ids"`
 }
 
+// CandidateList represents a listing of candidates.
+type CandidateList struct {
+	Pagination
+	Data []Candidate `json:"data"`
+}
+
 // Create sends a request to create a new Candidate.
 func (c Candidate) Create() error {
 
@@ -75,4 +81,49 @@ func (c Candidate) Create() error {
 	}
 
 	return nil
+}
+
+// Candidates sends a request to create a new Candidate.
+//
+// https://api.checkr.com/v1/candidates?page=2&per_page=25
+//
+func Candidates() (*CandidateList, error) {
+
+	// create a new request
+	url := URL.String() + candidates
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	// set API key for authentication and authorization
+	req.SetBasicAuth(apiKey, "")
+
+	// send the HTTP request with the default Go client
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	// read the HTTP response body
+	defer resp.Body.Close()
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	// unmarshal the candidate list
+	var list CandidateList
+	if err = json.Unmarshal(b, &list); err != nil {
+		return nil, err
+	}
+
+	// check the HTTP response status code is 200
+	if resp.StatusCode != http.StatusOK {
+
+		// return the HTTP response body as an error
+		return nil, errors.New(string(b))
+	}
+
+	return &list, nil
 }

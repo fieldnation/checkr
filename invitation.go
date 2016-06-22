@@ -25,6 +25,12 @@ type Invitation struct {
 	CandidateID   string    `json:"candidate_id"`
 }
 
+// Invitations represents a listing of invitations.
+type Invitations struct {
+	Pagination
+	Data []Invitation `json:"data"`
+}
+
 // Create sends an HTTP request to create a new Invitation.
 // The Invitation attributes Package and CandidateID are required.
 func (i Invitation) Create() error {

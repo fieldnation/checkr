@@ -20,3 +20,10 @@ func TestCreateCandidate(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestCandidates(t *testing.T) {
+	SetAPIKey(testKey)
+	if _, err := Candidates(); err != nil {
+		t.Error(err)
+	}
+}
