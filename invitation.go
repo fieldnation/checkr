@@ -12,21 +12,21 @@ import (
 // Invitation represents a background check invitation. The candidate will
 // receive an email to submit their information.
 type Invitation struct {
-	ID            string    `json:"id"`
-	Status        string    `json:"status"`
-	URI           string    `json:"uri"`
-	InvitationURL string    `json:"invitation_url"`
-	CompletedAt   time.Time `json:"completed_at"`
-	DeletedAt     time.Time `json:"deleted_at"`
-	ExpiresAt     time.Time `json:"expires_at"`
-	Package       string    `json:"package"`
-	Object        string    `json:"object"`
-	CreatedAt     time.Time `json:"created_at"`
-	CandidateID   string    `json:"candidate_id"`
+	ID            string     `json:"id,omitempty"`
+	Status        string     `json:"status,omitempty"`
+	URI           string     `json:"uri,omitempty"`
+	InvitationURL string     `json:"invitation_url,omitempty"`
+	CompletedAt   *time.Time `json:"completed_at,omitempty"`
+	DeletedAt     *time.Time `json:"deleted_at,omitempty"`
+	ExpiresAt     *time.Time `json:"expires_at,omitempty"`
+	Package       string     `json:"package,omitempty"`
+	Object        string     `json:"object,omitempty"`
+	CreatedAt     *time.Time `json:"created_at,omitempty"`
+	CandidateID   string     `json:"candidate_id,omitempty"`
 }
 
-// Invitations represents a listing of invitations.
-type Invitations struct {
+// InvitationList represents a listing of invitations.
+type InvitationList struct {
 	Pagination
 	Data []Invitation `json:"data"`
 }
@@ -78,4 +78,49 @@ func (i Invitation) Create() error {
 	}
 
 	return nil
+}
+
+// Invitations sends a request to create a new Invitation.
+//
+// https://api.checkr.com/v1/candidates?page=2&per_page=25
+//
+func Invitations() (*InvitationList, error) {
+
+	// create a new request
+	url := URL.String() + invitations
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	// set API key for authentication and authorization
+	req.SetBasicAuth(apiKey, "")
+
+	// send the HTTP request with the default Go client
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	// read the HTTP response body
+	defer resp.Body.Close()
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	// unmarshal the candidate list
+	var list InvitationList
+	if err = json.Unmarshal(b, &list); err != nil {
+		return nil, err
+	}
+
+	// check the HTTP response status code is 200
+	if resp.StatusCode != http.StatusOK {
+
+		// return the HTTP response body as an error
+		return nil, errors.New(string(b))
+	}
+
+	return &list, nil
 }
