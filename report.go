@@ -1,6 +1,7 @@
 package checkr
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"io/ioutil"
@@ -32,6 +33,49 @@ type Report struct {
 	CountyCriminalSearchIDs  []string   `json:"county_criminal_search_ids,omitempty"`
 	MotorVehicleReportID     string     `json:"motor_vehicle_report_id,omitempty"`
 	StateCriminalSearchIDs   []string   `json:"state_criminal_search_ids,omitempty"`
+}
+
+// Create sends a request to create a new Report.
+func (r Report) Create() error {
+
+	// marshal the candidate to buffered bytes representing JSON
+	b, err := json.Marshal(r)
+	if err != nil {
+		return err
+	}
+	body := bytes.NewBuffer(b)
+
+	// create a new request
+	url := URL.String() + reports
+	req, err := http.NewRequest(http.MethodPost, url, body)
+	if err != nil {
+		return err
+	}
+
+	// set API key for authentication and authorization
+	req.SetBasicAuth(apiKey, "")
+
+	// send the HTTP request with the default Go client
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+
+	// check the HTTP response status code is 201
+	if resp.StatusCode != http.StatusCreated {
+
+		// read the HTTP response body
+		defer resp.Body.Close()
+		b, err = ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
+
+		// return the HTTP response body as an error
+		return errors.New(string(b))
+	}
+
+	return nil
 }
 
 // Show shows one report.
