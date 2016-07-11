@@ -1,3 +1,4 @@
+// Package checkr provides a client for the checkr API.
 package checkr
 
 import (
